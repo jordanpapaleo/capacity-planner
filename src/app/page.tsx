@@ -24,12 +24,14 @@ type Availibility = {
   notes: string
 }
 /*
-http://localhost:3001?feteam=Alexia,Jose,Kemron,Karsten,Paul,Sheldon&beteam=Brad,Bruno,Diego,Vinicius
+http://localhost:3000/?feteam=Alexia,Jose,Kemron,Karsten,Paul,Sheldon&beteam=Brad,Bruno,Diego,Vinicius&fevelo=3&bevelo=3
  */
 export default function Home() {
   const searchParams = useSearchParams()
   const feTeam: string[] = searchParams.get('feteam')?.split(',').sort() || []
   const beTeam: string[] = searchParams.get('beteam')?.split(',').sort() || []
+  const initFeVelo: string = searchParams.get('fevelo') || 0 + ''
+  const initBeVelo: string = searchParams.get('bevelo') || 0 + ''
   const feRows: Availibility[] = feTeam.map((t, i) => ({ id: 'fe-' + i, name: t + ' (FE)', feDays: 10, beDays: 0, notes: '' }))
   const beRows: Availibility[] = beTeam.map((t, i) => ({ id: 'be-' + i, name: t + ' (BE)', feDays: 0, beDays: 10, notes: '' }))
   const initTotalFEDays = feTeam.length * 10
@@ -39,7 +41,7 @@ export default function Home() {
   const [title, setTitle] = React.useState<string>('Sprint 70')
   const [totalDays, setTotalDays] = React.useState<CommonState>({ fe: initTotalFEDays, be: initTotalBEDays })
   const [actualDays, setActualDays] = React.useState<CommonState>({ fe: initTotalFEDays, be: initTotalBEDays })
-  const [averageVelocity, setAverageVelocity] = React.useState<CommonState>({ fe: 0, be: 0 })
+  const [averageVelocity, setAverageVelocity] = React.useState<CommonState>({ fe: ~~initFeVelo, be: ~~initBeVelo })
   const [actualVelocity, setActualVelocity] = React.useState<CommonState>({ fe: 0, be: 0 })
   const [rollover, setRollover] = React.useState<Rollover[]>([])
   const [rollPoints, setRollPoints] = React.useState<CommonState>({ fe: 0, be: 0 })
