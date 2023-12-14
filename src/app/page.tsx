@@ -2,7 +2,7 @@
 
 import Input from '@/components/Input';
 import React from 'react';
-import Stat from '@/components/Stat';
+import Stat, { ErrorStat } from '@/components/Stat';
 import Table from '@/components/Table';
 
 type CommonState = { fe: number, be: number }
@@ -117,14 +117,14 @@ export default function Home() {
           <Stat title="Average BE Velo" value={`${averageVelocity.be}`} />
         </div>
 
-        <div className="stats mb-8 w-full bg-error">
-          <Stat title="Actual FE Days" value={`${actualDays.fe}`} />
-          <Stat title="Actual FE Velo" value={`${actualVelocity.fe - rollPoints.fe}`} />
-          <Stat title="Actual BE Days" value={`${actualDays.be}`} />
-          <Stat title="Actual BE Velo" value={`${actualVelocity.be - rollPoints.be}`} />
+        <div className="stats mb-8 w-full">
+          <ErrorStat title="Actual FE Days" value={`${actualDays.fe}`} />
+          <ErrorStat title="Actual FE Velo" value={`${actualVelocity.fe - rollPoints.fe}`} />
+          <ErrorStat title="Actual BE Days" value={`${actualDays.be}`} />
+          <ErrorStat title="Actual BE Velo" value={`${actualVelocity.be - rollPoints.be}`} />
         </div>
 
-        <div className="collapse bg-base-100 mb-4">
+        <div className="collapse collapse-arrow bg-base-100 mb-4">
           <input type="checkbox" name="my-accordion-1" />
           <div className="collapse-title text-xl font-medium">
             Team Availibility
@@ -154,7 +154,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="collapse bg-base-100">
+        <div className="collapse collapse-arrow bg-base-100">
           <input type="checkbox" name="my-accordion-1" />
           <div className="collapse-title text-xl font-medium">
             Sprint Rollover
