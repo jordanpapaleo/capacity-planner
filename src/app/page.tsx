@@ -1,5 +1,6 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import Input from '@/components/Input';
 import React from 'react';
 import Stat, { ErrorStat } from '@/components/Stat';
@@ -22,23 +23,24 @@ type Availibility = {
   beDays: number
   notes: string
 }
-
-const feTeam = ['Alexia', 'Jose', 'Kemron', 'Karsten', 'Paul', 'Sheldon'].sort()
-const beTeam = ['Brad', 'Bruno', 'Diego', 'Vinicius'].sort()
-const feRows: Availibility[] = feTeam.map((t, i) => ({ id: 'fe-' + i, name: t + ' (FE)', feDays: 10, beDays: 0, notes: '' }))
-const beRows: Availibility[] = beTeam.map((t, i) => ({ id: 'be-' + i, name: t + ' (BE)', feDays: 0, beDays: 10, notes: '' }))
-const initTotalFEDays = feTeam.length * 10
-const initTotalBEDays = beTeam.length * 10
-
+/*
+http://localhost:3001?feteam=Alexia,Jose,Kemron,Karsten,Paul,Sheldon&beteam=Brad,Bruno,Diego,Vinicius
+ */
 export default function Home() {
+  const searchParams = useSearchParams()
+  const feTeam: string[] = searchParams.get('feteam')?.split(',').sort() || []
+  const beTeam: string[] = searchParams.get('beteam')?.split(',').sort() || []
+  const feRows: Availibility[] = feTeam.map((t, i) => ({ id: 'fe-' + i, name: t + ' (FE)', feDays: 10, beDays: 0, notes: '' }))
+  const beRows: Availibility[] = beTeam.map((t, i) => ({ id: 'be-' + i, name: t + ' (BE)', feDays: 0, beDays: 10, notes: '' }))
+  const initTotalFEDays = feTeam.length * 10
+  const initTotalBEDays = beTeam.length * 10
+
   const [rows, setRows] = React.useState<Availibility[]>([...feRows, ...beRows])
   const [title, setTitle] = React.useState<string>('Sprint 70')
   const [totalDays, setTotalDays] = React.useState<CommonState>({ fe: initTotalFEDays, be: initTotalBEDays })
   const [actualDays, setActualDays] = React.useState<CommonState>({ fe: initTotalFEDays, be: initTotalBEDays })
   const [averageVelocity, setAverageVelocity] = React.useState<CommonState>({ fe: 0, be: 0 })
   const [actualVelocity, setActualVelocity] = React.useState<CommonState>({ fe: 0, be: 0 })
-  // const [averageVelocity, setAverageVelocity] = React.useState<CommonState>({ fe: feTeam.length * 5, be: beTeam.length * 5 })
-  // const [actualVelocity, setActualVelocity] = React.useState<CommonState>({ fe: feTeam.length * 5, be: beTeam.length * 5 })
   const [rollover, setRollover] = React.useState<Rollover[]>([])
   const [rollPoints, setRollPoints] = React.useState<CommonState>({ fe: 0, be: 0 })
 
@@ -50,9 +52,12 @@ export default function Home() {
   }, [rows])
 
   React.useEffect(() => {
+    const feVelo = Math.round(averageVelocity.fe * (actualDays.fe / totalDays.fe))
+    const beVelo = Math.round(averageVelocity.be * (actualDays.be / totalDays.be))
+
     setActualVelocity({
-      fe: Math.round(averageVelocity.fe * (actualDays.fe / totalDays.fe)),
-      be: Math.round(averageVelocity.be * (actualDays.be / totalDays.be)),
+      fe: isNaN(feVelo) ? 0 : feVelo,
+      be: isNaN(beVelo) ? 0 : beVelo,
     })
   }, [actualDays, totalDays, averageVelocity])
 
