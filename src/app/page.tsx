@@ -93,22 +93,28 @@ export default function Home() {
   return (
     <main className="min-h-screen mb-16">
       <header className="navbar gap-4 bg-base-100 mb-8">
-        <a className="btn btn-ghost text-xl">Velocity Planner</a>
+        <h1 className="font-extrabold text-xl whitespace-nowrap">Capacity Planner</h1>
         <Input value={title} placeholder="Title" onChange={(e) => {
           setTitle(e.target.value)
         }} />
-        <Input value={averageVelocity.fe} placeholder="FE Average Velo" onChange={(e) => {
-          setAverageVelocity({
-            ...averageVelocity,
-            fe: ~~e.target.value
-          })
-        }} />
-        <Input value={averageVelocity.be} placeholder="BE Average Velo" onChange={(e) => {
-          setAverageVelocity({
-            ...averageVelocity,
-            be: ~~e.target.value
-          })
-        }} />
+        <div>
+          <strong>FE Velo</strong>
+          <Input value={averageVelocity.fe} placeholder="FE Average Velo" onChange={(e) => {
+            setAverageVelocity({
+              ...averageVelocity,
+              fe: ~~e.target.value
+            })
+          }} />
+        </div>
+        <div>
+          <strong>BE Velo</strong>
+          <Input value={averageVelocity.be} placeholder="BE Average Velo" onChange={(e) => {
+            setAverageVelocity({
+              ...averageVelocity,
+              be: ~~e.target.value
+            })
+          }} />
+        </div>
         <button className="btn btn-neutral" type="button" onClick={() => {
           console.log(JSON.stringify({ actualDays, actualVelocity }, null, 2))
         }}>Save Plan</button>
