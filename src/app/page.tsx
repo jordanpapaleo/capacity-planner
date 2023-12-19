@@ -23,6 +23,14 @@ type Availibility = {
   beDays: number
   notes: string
 }
+
+type Spike = {
+  id: string
+  story: string
+  feDays: number
+  beDays: number
+  notes: string
+}
 /*
 http://localhost:3000/?feteam=Alexia,Jose,Kemron,Karsten,Paul,Sheldon&beteam=Brad,Bruno,Diego,Vinicius&fevelo=3&bevelo=3
  */
@@ -37,27 +45,35 @@ export default function Home() {
   const initTotalFEDays = feTeam.length * 10
   const initTotalBEDays = beTeam.length * 10
 
-  const [rows, setRows] = React.useState<Availibility[]>([...feRows, ...beRows])
-  const [title, setTitle] = React.useState<string>('Sprint 70')
-  const [totalDays, setTotalDays] = React.useState<CommonState>({ fe: initTotalFEDays, be: initTotalBEDays })
+  const [title, setTitle] = React.useState<string>('')
+  const [teamDays, setTeamDays] = React.useState<Availibility[]>([...feRows, ...beRows])
+  const [spikeDays, setSpikeDays] = React.useState<Spike[]>([])
+  const [totalDays] = React.useState<CommonState>({ fe: initTotalFEDays, be: initTotalBEDays })
   const [actualDays, setActualDays] = React.useState<CommonState>({ fe: initTotalFEDays, be: initTotalBEDays })
   const [averageVelocity, setAverageVelocity] = React.useState<CommonState>({ fe: ~~initFeVelo, be: ~~initBeVelo })
-  const [actualVelocity, setActualVelocity] = React.useState<CommonState>({ fe: 0, be: 0 })
+  const [availablePoints, setAvailablePoints] = React.useState<CommonState>({ fe: 0, be: 0 })
   const [rollover, setRollover] = React.useState<Rollover[]>([])
   const [rollPoints, setRollPoints] = React.useState<CommonState>({ fe: 0, be: 0 })
 
   React.useEffect(() => {
-    setActualDays(rows.reduce((curr, next) => ({
+    const reducedTeamDays = teamDays.reduce((curr, next) => ({
       fe: curr.fe + ~~next.feDays,
-      be: curr.be + ~~next.beDays
-    }), { fe: 0, be: 0 }))
-  }, [rows])
+      be: curr.be + ~~next.beDays,
+    }), { fe: 0, be: 0 })
+
+    const reducedTeamAndSpikeDays = spikeDays.reduce((curr, next) => ({
+      fe: curr.fe + ~~next.feDays * -1,
+      be: curr.be + ~~next.beDays * -1,
+    }), reducedTeamDays)
+
+    setActualDays(reducedTeamAndSpikeDays)
+  }, [teamDays, spikeDays])
 
   React.useEffect(() => {
     const feVelo = Math.round(averageVelocity.fe * (actualDays.fe / totalDays.fe))
     const beVelo = Math.round(averageVelocity.be * (actualDays.be / totalDays.be))
 
-    setActualVelocity({
+    setAvailablePoints({
       fe: isNaN(feVelo) ? 0 : feVelo,
       be: isNaN(beVelo) ? 0 : beVelo,
     })
@@ -71,7 +87,7 @@ export default function Home() {
   }, [rollover])
 
   const handleChange = (id: string, key: string, value: string) => {
-    setRows(rows.map((row) => {
+    setTeamDays(teamDays.map((row) => {
       return (row.id === id)
         ? {
           ...row,
@@ -81,8 +97,19 @@ export default function Home() {
     }))
   }
 
-  const handleRolloverChange = (id: string, key: string, value: string) => {
+  const handleRolloverChange = (id: string, key: string, value: string | number) => {
     setRollover(rollover.map((row) => {
+      return (row.id === id)
+        ? {
+          ...row,
+          [key]: value
+        }
+        : row
+    }))
+  }
+
+  const handleSpikeChange = (id: string, key: string, value: string | number) => {
+    setSpikeDays(spikeDays.map((row) => {
       return (row.id === id)
         ? {
           ...row,
@@ -118,7 +145,14 @@ export default function Home() {
           }} />
         </div>
         <button className="btn btn-neutral" type="button" onClick={() => {
-          console.log(JSON.stringify({ actualDays, actualVelocity }, null, 2))
+          console.log(JSON.stringify({
+            title,
+            actualDays,
+            availablePoints,
+            spikeDays,
+            rollover,
+            rollPoints,
+          }, null, 2))
         }}>Save Plan</button>
       </header>
 
@@ -132,20 +166,21 @@ export default function Home() {
 
         <div className="stats mb-8 w-full">
           <ErrorStat title="Actual FE Days" value={`${actualDays.fe}`} />
-          <ErrorStat title="Actual FE Velo" value={`${actualVelocity.fe - rollPoints.fe}`} />
+          <ErrorStat title="Available FE Points" value={`${availablePoints.fe - rollPoints.fe}`} />
           <ErrorStat title="Actual BE Days" value={`${actualDays.be}`} />
-          <ErrorStat title="Actual BE Velo" value={`${actualVelocity.be - rollPoints.be}`} />
+          <ErrorStat title="Available BE Points" value={`${availablePoints.be - rollPoints.be}`} />
         </div>
 
         <div className="collapse collapse-arrow bg-base-100 mb-4">
-          <input type="checkbox" name="my-accordion-1" />
+          <input type="checkbox" name="team" />
           <div className="collapse-title text-xl font-medium">
-            Team Availibility
+            Team Availible Days
           </div>
           <div className="collapse-content">
+            <p className="text-s mb-4">Max 10 days. Min 0 days. An decrease in days decrease available time in the sprint</p>
             <Table
               headings={['name', 'feDays', 'beDays', 'notes']}
-              rows={rows}
+              rows={teamDays}
               renderOverride={{
                 feDays: (row: Availibility) => {
                   return <Input type="number" value={row.feDays} onChange={(e) => {
@@ -167,12 +202,68 @@ export default function Home() {
           </div>
         </div>
 
+        <div className="collapse collapse-arrow bg-base-100 mb-4">
+          <input type="checkbox" name="spikes" />
+          <div className="collapse-title text-xl font-medium">
+            Spike Days
+          </div>
+          <div className="collapse-content">
+            <p className="text-s mb-4">An increase in spike days decrease available time in the sprint</p>
+            <Table
+              headings={['story', 'feDays', 'beDays', 'notes']}
+              rows={spikeDays}
+              renderOverride={{
+                story: (row: Spike) => {
+                  return <Input value={row.story} onChange={(e) => {
+                    handleSpikeChange(row.id, 'story', e.target.value)
+                  }} />
+                },
+                feDays: (row: Spike) => {
+                  return <Input type="number" value={row.feDays} onChange={(e) => {
+                    handleSpikeChange(row.id, 'feDays', ~~e.target.value)
+                  }} />
+                },
+                beDays: (row: Spike) => {
+                  return <Input type="number" value={row.beDays} onChange={(e) => {
+                    handleSpikeChange(row.id, 'beDays', ~~e.target.value)
+                  }} />
+                },
+                notes: (row: Spike) => {
+                  return <Input value={row.notes} onChange={(e) => {
+                    handleSpikeChange(row.id, 'notes', e.target.value)
+                  }} />
+                }
+              }}
+            />
+
+            <button
+              type="button"
+              className="btn btn-neutral mt-8"
+              onClick={() => {
+                setSpikeDays([
+                  ...spikeDays,
+                  {
+                    id: '' + Date.now(),
+                    story: '',
+                    feDays: 0,
+                    beDays: 0,
+                    notes: ''
+                  }
+                ])
+              }}
+            >
+              Add Spike
+            </button>
+          </div>
+        </div>
+
         <div className="collapse collapse-arrow bg-base-100">
-          <input type="checkbox" name="my-accordion-1" />
+          <input type="checkbox" name="rollover" />
           <div className="collapse-title text-xl font-medium">
             Sprint Rollover
           </div>
           <div className="collapse-content">
+            <p className="text-s mb-4">An increase in rolled points decreases the available points</p>
             <Table
               headings={['story', 'fepoints', 'bepoints', 'notes']}
               rows={rollover}
@@ -184,17 +275,17 @@ export default function Home() {
                 },
                 fepoints: (row: Rollover) => {
                   return <Input type="number" value={row.fepoints} onChange={(e) => {
-                    handleRolloverChange(row.id, 'fepoints', e.target.value)
+                    handleRolloverChange(row.id, 'fepoints', ~~e.target.value)
                   }} />
                 },
                 bepoints: (row: Rollover) => {
                   return <Input type="number" value={row.bepoints} onChange={(e) => {
-                    handleRolloverChange(row.id, 'bepoints', e.target.value)
+                    handleRolloverChange(row.id, 'bepoints', ~~e.target.value)
                   }} />
                 },
                 notes: (row: Rollover) => {
                   return <Input value={row.notes} onChange={(e) => {
-                    handleChange(row.id, 'beDays', e.target.value)
+                    handleRolloverChange(row.id, 'notes', e.target.value)
                   }} />
                 }
               }}
@@ -220,7 +311,6 @@ export default function Home() {
             </button>
           </div>
         </div>
-
       </div>
     </main>
   )
