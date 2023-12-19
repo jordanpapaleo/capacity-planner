@@ -177,7 +177,7 @@ export default function Home() {
             Team Availible Days
           </div>
           <div className="collapse-content">
-            <p className="text-s mb-4">Max 10 days. Min 0 days. An decrease in days decrease available time in the sprint</p>
+            <p className="text-s mb-4">0 - 10 engineer days per sprint. A decrease in days decrease available time in the sprint</p>
             <Table
               headings={['name', 'feDays', 'beDays', 'notes']}
               rows={teamDays}
@@ -208,7 +208,7 @@ export default function Home() {
             Spike Days
           </div>
           <div className="collapse-content">
-            <p className="text-s mb-4">An increase in spike days decrease available time in the sprint</p>
+            <p className="text-s mb-4">Spikes are 0 points and timeboxed to a set number of days. An increase in spike days decrease available time in the sprint</p>
             <Table
               headings={['story', 'feDays', 'beDays', 'notes']}
               rows={spikeDays}
@@ -263,7 +263,7 @@ export default function Home() {
             Sprint Rollover
           </div>
           <div className="collapse-content">
-            <p className="text-s mb-4">An increase in rolled points decreases the available points</p>
+            <p className="text-s mb-4">Sprint rollover is measured in points.  An increase in rolled points decreases the available points</p>
             <Table
               headings={['story', 'fepoints', 'bepoints', 'notes']}
               rows={rollover}
