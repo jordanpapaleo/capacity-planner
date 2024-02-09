@@ -122,7 +122,12 @@ export default function Home() {
   return (
     <main className="min-h-screen mb-16">
       <header className="navbar gap-4 bg-base-100 mb-8">
-        <h1 className="font-extrabold text-xl whitespace-nowrap">Capacity Planner</h1>
+        <h1 className="font-extrabold text-xl whitespace-nowrap">
+          <div className="mr-2">Capacity Planner</div>
+          <div className="tooltip tooltip-right" data-tip="?feteam=&beteam=&fevelo=&bevelo=">
+            <div className="badge badge-neutral">qp</div>
+          </div>
+        </h1>
         <Input value={title} placeholder="Title" onChange={(e) => {
           setTitle(e.target.value)
         }} />
